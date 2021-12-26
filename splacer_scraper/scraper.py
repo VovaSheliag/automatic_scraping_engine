@@ -1,15 +1,13 @@
 import logging
 import time
 import datetime
-
-
 import requests
+
 from bs4 import BeautifulSoup
 from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 
 
@@ -203,6 +201,5 @@ class Splacer:
 
             for item in items:
                 links_list.append(item.find_element(By.TAG_NAME, 'a').get_attribute('href'))
-                # print(item.find_element(By.TAG_NAME, 'a').get_attribute('href'))
 
             self.parse_page(links_list)

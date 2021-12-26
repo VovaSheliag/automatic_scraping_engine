@@ -98,6 +98,7 @@ class Peerspace:
         """
 
         for link in links_list:
+            link, sep, order = link.partition('?sort_order=')
             page = requests.get(link)
             soup = BeautifulSoup(page.text, 'html.parser')
 
@@ -213,4 +214,3 @@ class Peerspace:
                  self.proceed_url(base+activity_url_arg+location_url_arg)
 
         logging.info('[ PEERSPACE ]: Parsing pages finished')
-

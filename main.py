@@ -20,10 +20,10 @@ if __name__ == '__main__':
 
     db = Database()
 
-    # peerspace = Peerspace(driver, db)
-    # peerspace.start()
+    peerspace = Peerspace(driver, db)
+    peerspace.start()
 
-    splacer = Splacer(driver, db)
-    splacer.start()
+    # splacer = Splacer(driver, db)
+    # splacer.start()
 
     time.sleep(10)
