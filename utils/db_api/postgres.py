@@ -11,39 +11,45 @@ class Database:
                                            host="127.0.0.1",
                                            port="5432",
                                            database="postgres")
-
         self.cursor = self.connection.cursor()
+
+        self.create_tables()
+
+    def create_tables(self):
+        self.cursor = self.connection.cursor()
+
         # peerspace table creation
         sql = """
-                CREATE TABLE IF NOT EXISTS peerspace (
-                listing_url VARCHAR(255) NOT NULL,
-                location_name VARCHAR(255),
-                host_name VARCHAR(255),
-                address VARCHAR(255),
-                phone_number VARCHAR(255),
-                review_count INT,
-                date_created TIMESTAMP,
-                PRIMARY KEY (listing_url)
-                )
-                """
+                        CREATE TABLE IF NOT EXISTS peerspace (
+                        listing_url VARCHAR(255) NOT NULL,
+                        location_name VARCHAR(255),
+                        host_name VARCHAR(255),
+                        address VARCHAR(255),
+                        phone_number VARCHAR(255),
+                        review_count INT,
+                        date_created TIMESTAMP,
+                        PRIMARY KEY (listing_url)
+                        )
+                        """
 
         self.cursor.execute(sql)
         self.connection.commit()
+
         logging.info('[ DATABASE ]: Table for peerspace.com was created successfully')
 
         # splacer table creation
         sql = """
-                CREATE TABLE IF NOT EXISTS splacer (
-                listing_url VARCHAR(255) NOT NULL,
-                location_name VARCHAR(255),
-                host_name VARCHAR(255),
-                address VARCHAR(255),
-                phone_number VARCHAR(255),
-                review_count INT,
-                date_created TIMESTAMP,
-                PRIMARY KEY (listing_url)
-                )
-                """
+                        CREATE TABLE IF NOT EXISTS splacer (
+                        listing_url VARCHAR(255) NOT NULL,
+                        location_name VARCHAR(255),
+                        host_name VARCHAR(255),
+                        address VARCHAR(255),
+                        phone_number VARCHAR(255),
+                        review_count INT,
+                        date_created TIMESTAMP,
+                        PRIMARY KEY (listing_url)
+                        )
+                        """
         self.cursor.execute(sql)
         self.connection.commit()
         logging.info('[ DATABASE ]: Table for slpacer.com was created successfully')
