@@ -1,4 +1,5 @@
 import psycopg2
+import logging
 from psycopg2 import Error
 
 
@@ -12,13 +13,46 @@ class Database:
                                            database="postgres")
 
         self.cursor = self.connection.cursor()
-        # table creation
-        create_table_query = '''CREATE TABLE IF NOT EXISTS test_table
-                                  (ID INT PRIMARY KEY     NOT NULL,
-                                  MODEL           TEXT    NOT NULL,
-                                  PRICE         REAL); '''
+        # peerspace table creation
+        sql = """
+                CREATE TABLE IF NOT EXISTS peerspace (
+                listing_url VARCHAR(255) NOT NULL,
+                location_name VARCHAR(255),
+                host_name VARCHAR(255),
+                address VARCHAR(255),
+                phone_number VARCHAR(255),
+                review_count INT,
+                date_created TIMESTAMP,
+                PRIMARY KEY (listing_url)
+                )
+                """
 
-        self.cursor.execute(create_table_query)
+        self.cursor.execute(sql)
         self.connection.commit()
-        print("Test table was successfully created")
+        logging.info('[ DATABASE ]: Table for peerspace.com was created successfully')
+
+        # splacer table creation
+        sql = """
+                CREATE TABLE IF NOT EXISTS splacer (
+                listing_url VARCHAR(255) NOT NULL,
+                location_name VARCHAR(255),
+                host_name VARCHAR(255),
+                address VARCHAR(255),
+                phone_number VARCHAR(255),
+                review_count INT,
+                date_created TIMESTAMP,
+                PRIMARY KEY (listing_url)
+                )
+                """
+        self.cursor.execute(sql)
+        self.connection.commit()
+        logging.info('[ DATABASE ]: Table for slpacer.com was created successfully')
+        self.cursor.close()
+
+    def add_listing(self, table_name, listing_url, location_name, host_name, address, phone_number, review_count, date_created):
+        sql = "INSERT INTO " + str(table_name) + " (listing_url, location_name, host_name, address, phone_number, review_count, date_created) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+
+        self.cursor = self.connection.cursor()
+        self.cursor.execute(sql, (listing_url, location_name, host_name, address, phone_number, review_count, date_created))
+        self.connection.commit()
         self.cursor.close()

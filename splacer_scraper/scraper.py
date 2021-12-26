@@ -1,5 +1,7 @@
 import logging
 import time
+import datetime
+
 
 import requests
 from bs4 import BeautifulSoup
@@ -12,8 +14,9 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 
 class Splacer:
-    def __init__(self, driver):
+    def __init__(self, driver, db):
         self.driver = driver
+        self.db = db
 
     def parse_activities(self):
         """
@@ -25,7 +28,7 @@ class Splacer:
 
         # redirecting to activities page
 
-        logging.info('Activity parsing started')
+        logging.info('[ SPLACER ]: Activity parsing started')
 
         self.driver.get('https://www.splacer.co/search/activities')
 
@@ -60,7 +63,7 @@ class Splacer:
         """
         # redirecting to locations page
 
-        logging.info('Locations parsing started')
+        logging.info('[ SPLACER ]: Locations parsing started')
 
         self.driver.get('https://www.splacer.co/rent/locations')
 
@@ -77,7 +80,7 @@ class Splacer:
         for location in locations_links:
             result.append(location.text)
 
-        logging.info('Locations parsing finished')
+        logging.info('[ SPLACER ]: Locations parsing finished')
         return result
 
     def start(self):
@@ -125,6 +128,12 @@ class Splacer:
             # there is no access to phone number on the page
             phone_number = None
 
+            try:
+                self.db.add_listing('splacer', link, location_name, host_name, listing_location, phone_number,
+                                    int(reviews_count), datetime.datetime.now())
+            except:
+                pass
+
             print(link)
             print(location_name)
             print(host_name)
@@ -134,7 +143,7 @@ class Splacer:
             print('\n\n\n\n')
 
     def proceed_url(self, url):
-        logging.info('Processing url: ' + url)
+        logging.info('[ SPLACER ]: Processing url: ' + url)
 
         self.driver.get(url)
 
@@ -143,7 +152,7 @@ class Splacer:
             pagination_ul = WebDriverWait(self.driver, 5).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, 'ul.pagination')))
 
-            logging.warning('Pagination found')
+            logging.warning('[ SPLACER ]: Pagination found')
 
             while True:
 
@@ -185,7 +194,7 @@ class Splacer:
                     break
 
         except TimeoutException:
-            print('pagination_ul not found: ' + str(url))
+            logging.info('[ SPLACER ]: Pagination not found')
 
             links_list = []
 

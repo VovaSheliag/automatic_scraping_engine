@@ -1,5 +1,6 @@
 import logging
 import time
+import datetime
 
 import requests
 from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException
@@ -10,8 +11,9 @@ from bs4 import BeautifulSoup
 
 
 class Peerspace:
-    def __init__(self, driver):
+    def __init__(self, driver, db):
         self.driver = driver
+        self.db = db
 
     def parse_activities(self):
         """
@@ -22,7 +24,7 @@ class Peerspace:
         """
         # redirecting to activities page
 
-        logging.info('Activity parsing started')
+        logging.info('[ PEERSPACE ]: Activity parsing started')
 
         self.driver.get('https://www.peerspace.com/plan/activities')
 
@@ -43,7 +45,7 @@ class Peerspace:
             link = link.replace('https://www.peerspace.com/plan/', '')
             result.append(link)
 
-        logging.info('Activity parsing finished')
+        logging.info('[ PEERSPACE ]: Activity parsing finished')
 
         return result
 
@@ -56,7 +58,7 @@ class Peerspace:
         """
         # redirecting to locations page
 
-        logging.info('Locations parsing started')
+        logging.info('[ PEERSPACE ]: Locations parsing started')
 
         self.driver.get('https://www.peerspace.com/venues/locations')
 
@@ -85,7 +87,7 @@ class Peerspace:
 
             result.append(link)
 
-        logging.info('Activity parsing finished')
+        logging.info('[ PEERSPACE ]: Activity parsing finished')
 
         return result
 
@@ -117,13 +119,19 @@ class Peerspace:
             # there is no access to phone number on the page
             phone_number = None
 
+            try:
+                self.db.add_listing('peerspace', link, location_name, host_name, listing_location, phone_number,
+                                    int(reviews_count), datetime.datetime.now())
+            except:
+                pass
+
             print(link)
             print(location_name)
             print(host_name)
             print(listing_location)
             print(reviews_count)
             print(phone_number)
-            print('\n\n\n\n')
+            print('\n\n')
 
     def proceed_url(self, url):
         """
@@ -131,7 +139,7 @@ class Peerspace:
         calling the parse_page() method for each pagination page, if exists
         """
 
-        logging.info('Processing url: ' + url)
+        logging.info('[ PEERSPACE ]: Processing url: ' + url)
 
         self.driver.get(url)
 
@@ -140,7 +148,7 @@ class Peerspace:
             pagination_ul = WebDriverWait(self.driver, 5).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, 'ul.pagination')))
 
-            logging.warning('Pagination found')
+            logging.warning('[ PEERSPACE ]: Pagination found')
 
             while True:
 
@@ -166,11 +174,11 @@ class Peerspace:
                             logging.info('Processing next pagination page')
 
                 except ElementClickInterceptedException:
-                    logging.warning('Pagination parsing finished')
+                    logging.warning('[ PEERSPACE ]: Pagination parsing finished')
                     break
 
         except TimeoutException:
-            print('pagination_ul not found: ' + str(url))
+            logging.info('[ PEERSPACE ]: pagination not found')
 
             links_list = []
 
@@ -204,5 +212,5 @@ class Peerspace:
 
                  self.proceed_url(base+activity_url_arg+location_url_arg)
 
-        logging.info('Parsing pages finished')
+        logging.info('[ PEERSPACE ]: Parsing pages finished')
 
