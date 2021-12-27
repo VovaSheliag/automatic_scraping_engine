@@ -1,6 +1,7 @@
 import psycopg2
+from psycopg2._psycopg import DatabaseError
+
 import logging
-from psycopg2 import Error
 
 
 class Database:
@@ -56,9 +57,17 @@ class Database:
         self.cursor.close()
 
     def add_listing(self, table_name, listing_url, location_name, host_name, address, phone_number, review_count, date_created):
-        sql = "INSERT INTO " + str(table_name) + " (listing_url, location_name, host_name, address, phone_number, review_count, date_created) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+        try:
+            sql = "INSERT INTO " + str(
+                table_name) + " (listing_url, location_name, host_name, address, phone_number, review_count, date_created) VALUES (%s,%s,%s,%s,%s,%s,%s)"
 
-        self.cursor = self.connection.cursor()
-        self.cursor.execute(sql, (listing_url, location_name, host_name, address, phone_number, review_count, date_created))
-        self.connection.commit()
-        self.cursor.close()
+            self.cursor = self.connection.cursor()
+            self.cursor.execute(sql, (
+            listing_url, location_name, host_name, address, phone_number, review_count, date_created))
+            self.connection.commit()
+            self.cursor.close()
+        except DatabaseError:
+            self.cursor = self.connection.cursor()
+            self.cursor.execute("ROLLBACK")
+            self.connection.commit()
+            self.cursor.close()
