@@ -98,6 +98,7 @@ class Peerspace:
         """
 
         for link in links_list:
+            # removing sort_order argument to keep each listing url unique
             link, sep, order = link.partition('?sort_order=')
             page = requests.get(link)
             soup = BeautifulSoup(page.text, 'html.parser')
