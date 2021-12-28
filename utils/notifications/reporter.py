@@ -37,7 +37,7 @@ class Reporter:
 
         # check for new listings
         for listing in all_listings:
-            if listing[-1] > self.PARSING_STARTED - datetime.timedelta(days=3) and listing[-1] < self.PARSING_FINISHED:
+            if listing[-1] > self.PARSING_STARTED - datetime.timedelta(days=1) and listing[-1] < self.PARSING_FINISHED:
                 new_listings.append(listing)
         return new_listings
 
