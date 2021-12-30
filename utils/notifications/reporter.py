@@ -16,8 +16,13 @@ class Reporter:
         with open('reports/' + str(table_name) + '.csv', mode='w+', newline='') as file:
             writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
+            writer.writerow(['Link', 'Location Name', 'Host Name', 'Address', 'Phone Number', 'Review Count'])
+
             for listing in new_listings:
-                writer.writerow(listing)
+                try:
+                    writer.writerow(listing[:-1])
+                except:
+                    pass
 
     def parse_tables(self):
         tables_list = self.get_tables()
@@ -37,7 +42,7 @@ class Reporter:
 
         # check for new listings
         for listing in all_listings:
-            if listing[-1] > self.PARSING_STARTED - datetime.timedelta(days=1) and listing[-1] < self.PARSING_FINISHED:
+            if self.PARSING_STARTED - datetime.timedelta(days=4) < listing[-1] < self.PARSING_FINISHED:
                 new_listings.append(listing)
         return new_listings
 

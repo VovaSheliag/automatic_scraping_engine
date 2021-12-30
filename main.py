@@ -7,6 +7,9 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 from peerspace_scraper.scraper import Peerspace
+from splacer_scraper.scraper import Splacer
+from partyslate_scraper.scraper import Partyslate
+
 from utils.db_api.postgres import Database
 from utils.notifications.reporter import Reporter
 
@@ -27,6 +30,9 @@ if __name__ == '__main__':
 
     # splacer = Splacer(driver, db)
     # splacer.start()
+
+    # partyslate = Partyslate(driver, db)
+    # partyslate.parse_vendors()
 
     PARSING_FINISHED = datetime.datetime.now()
 

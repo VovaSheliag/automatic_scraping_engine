@@ -90,7 +90,7 @@ class Splacer:
         activities = self.parse_activities()
         locations = self.parse_locations()
 
-        for location in locations:
+        for location in locations[16:]:
             for key in activities:
                 for activity in activities[key]:
                     print(location + " : " + key + " : " + activity)
@@ -109,18 +109,20 @@ class Splacer:
             soup = BeautifulSoup(page.text, 'html.parser')
 
             # parsing data
-            location_name = soup.find('div', class_='title').text
+            location_name = soup.find('div', class_='title').text.translate(''.join(["'", '"']))
             try:
-                host_name = soup.find('div', class_='owner-name').text
+                host_name = soup.find('div', class_='owner-name').text.translate(''.join(["'", '"']))
             except AttributeError:
                 host_name = None
             try:
-                listing_location = soup.find('span', class_='splace-city').text
+                listing_location = soup.find('span', class_='splace-city').text.translate(''.join(["'", '"']))
             except:
                 listing_location = None
             try:
-                reviews_count = soup.find('div', id='sp-pointer').text.replace(['reviews', '(', ')'], '')
-            except AttributeError:
+                container = soup.find('div', class_='h-stars')
+                reviews_count = container.find('div', class_='sp-pointer').text
+                reviews_count = ''.join(c for c in str(reviews_count) if c.isdigit())
+            except Exception as e:
                 reviews_count = 0
 
             # there is no access to phone number on the page
@@ -129,8 +131,8 @@ class Splacer:
             try:
                 self.db.add_listing('splacer', link, location_name, host_name, listing_location, phone_number,
                                     int(reviews_count), datetime.datetime.now())
-            except:
-                pass
+            except Exception as e:
+                print(e)
 
             print(link)
             print(location_name)
@@ -162,8 +164,15 @@ class Splacer:
                         EC.presence_of_all_elements_located((By.CLASS_NAME, 'sp-splace')))
 
                     for card in cards:
-                        link = card.find_element(By.CLASS_NAME, 'sp-title').get_attribute('href')
-                        links.append(link)
+                        try:
+
+                            # to skip sponsored links
+
+                            link = card.find_element(By.CLASS_NAME, 'sp-title').get_attribute('href')
+                            print(link)
+                            links.append(link)
+                        except Exception as e:
+                            print(e)
 
                 except TimeoutException:
                     pass
@@ -196,10 +205,14 @@ class Splacer:
 
             links_list = []
 
-            items_container = self.driver.find_element(By.CLASS_NAME, 'search-thumbnails')
-            items = items_container.find_elements(By.CLASS_NAME, 'Listing-Thumbnail')
+            try:
+                items_container = self.driver.find_element(By.CLASS_NAME, 'search-thumbnails')
+                items = items_container.find_elements(By.CLASS_NAME, 'Listing-Thumbnail')
 
-            for item in items:
-                links_list.append(item.find_element(By.TAG_NAME, 'a').get_attribute('href'))
+                for item in items:
+                    links_list.append(item.find_element(By.TAG_NAME, 'a').get_attribute('href'))
+            except:
+                # if page is emtpy
+                logging.info('[ SPLACER ]: Page is empty')
 
             self.parse_page(links_list)

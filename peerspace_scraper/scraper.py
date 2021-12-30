@@ -104,13 +104,13 @@ class Peerspace:
             soup = BeautifulSoup(page.text, 'html.parser')
 
             # parsing data
-            location_name = soup.find('h1', class_='listing-header').text
+            location_name = soup.find('h1', class_='listing-header').text.translate(''.join(["'", '"']))
             try:
-                host_name = soup.find('div', class_='host-name').text
+                host_name = soup.find('div', class_='host-name').text.translate(''.join(["'", '"']))
             except AttributeError:
                 host_name = None
             try:
-                listing_location = soup.find('p', class_='ListingLocation').text
+                listing_location = soup.find('p', class_='ListingLocation').text.translate(''.join(["'", '"']))
             except:
                 listing_location = None
             try:

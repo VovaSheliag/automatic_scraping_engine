@@ -67,6 +67,7 @@ class Database:
             self.connection.commit()
             self.cursor.close()
         except DatabaseError:
+            print('rollback')
             self.cursor = self.connection.cursor()
             self.cursor.execute("ROLLBACK")
             self.connection.commit()
