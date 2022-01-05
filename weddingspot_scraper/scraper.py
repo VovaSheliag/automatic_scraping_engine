@@ -1,0 +1,92 @@
+import time
+import logging
+
+import requests
+from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
+
+
+class WeddingSpot:
+    def __init__(self, driver, db):
+        self.driver = driver
+        self.db = db
+
+    @staticmethod
+    def get_phone(link):
+        page = requests.get(link)
+        soup = BeautifulSoup(page.text, 'html.parser')
+        if soup.find('span', 'SecondaryCTA--hidden') is None:
+            return None
+        return soup.find('span', 'SecondaryCTA--hidden').text
+
+    @staticmethod
+    def get_link(div):
+        try:
+            link = div.find_element_by_tag_name('a').get_attribute('href')
+            logging.info('[ WEDDING SPOT ]: got venue link')
+            return link
+        except:
+            logging.error('[ WEDDING SPOT ]: something went wrong with link scraping')
+            return None
+
+    @staticmethod
+    def get_name(div):
+        try:
+            name = div.find_element(By.CLASS_NAME, 'venueCard--title').text.replace(',', '')
+            logging.info('[ WEDDING SPOT ]: got venue name')
+            return name
+        except:
+            logging.error('[ WEDDING SPOT ]: something went wrong with name scraping')
+            return None
+
+    @staticmethod
+    def get_address(div):
+        try:
+            link = div.find_element(By.CLASS_NAME, 'venueCard--locationText').text.replace(',', '')
+            logging.info('[ WEDDING SPOT ]: got venue address')
+            return link
+        except:
+            logging.error('[ WEDDING SPOT ]: something went wrong with address scraping')
+            return None
+
+    def get_all_info(self, page):
+        self.driver.get(f'https://www.wedding-spot.com/wedding-venues/?page={page}&sr=1')
+        time.sleep(2)
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        all_venues = self.driver.find_elements(By.CLASS_NAME, 'venueCard--wrapper')
+        for div_path in all_venues:
+            link = self.get_link(div_path)
+            if self.check_if_exist(link):
+                continue
+            name = self.get_name(div_path)
+            address = self.get_address(div_path)
+            phone = self.get_phone(link)
+            # with open('wedding_spot.csv', 'a+') as f:
+            #     f.write(f'{link},{name},None,{address},{phone},None\n')
+            time.sleep(3)
+
+    @staticmethod
+    def get_pages_count():
+        try:
+            page = requests.get('https://www.wedding-spot.com/wedding-venues/?sr=1')
+            soup = BeautifulSoup(page.text, 'html.parser')
+            pages_count = soup.find_all('button', {'class': 'css-158cw5n', 'aria-label': ''})
+            print(pages_count[-1].text)
+            return int(pages_count[-1].text)
+        except:
+            logging.error('[ WEDDING SPOT: something went wrong with getting pages count]')
+
+    def start(self):
+        pages = self.get_pages_count()
+        logging.info('[ WEDDING SPOT ]: got pages count')
+        for page in range(1, pages+1):
+            self.get_all_info(page)
+
+    @staticmethod
+    def check_if_exist(link):
+        with open('wedding_spot.csv', encoding="utf8") as f:
+            for line in f:
+                if link in line:
+                    return True
+            return False
+
