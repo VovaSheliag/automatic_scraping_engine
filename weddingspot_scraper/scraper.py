@@ -40,11 +40,14 @@ class WeddingSpot:
             return None
 
     @staticmethod
-    def get_address(div):
+    def get_address(link):
         try:
-            link = div.find_element(By.CLASS_NAME, 'venueCard--locationText').text.replace(',', '')
+            r = requests.get(link)
+            soup = BeautifulSoup(r.text, 'html.parser')
+            address = soup.find_all('div', {'class': 'VenuePage--detail'})[3]
+            address = address.text.replace(',', '').replace('\n', '').replace('Location:', '')
             logging.info('[ WEDDING SPOT ]: got venue address')
-            return link
+            return address
         except:
             logging.error('[ WEDDING SPOT ]: something went wrong with address scraping')
             return None
@@ -59,10 +62,11 @@ class WeddingSpot:
             if self.check_if_exist(link):
                 continue
             name = self.get_name(div_path)
-            address = self.get_address(div_path)
+            address = self.get_address(link)
             phone = self.get_phone(link)
-            # with open('wedding_spot.csv', 'a+') as f:
-            #     f.write(f'{link},{name},None,{address},{phone},None\n')
+            with open('wedding_spot.csv', 'a+') as f:
+                f.write(f'{link},{name},None,{address},{phone},None\n')
+            print(link)
             time.sleep(3)
 
     @staticmethod
@@ -71,7 +75,6 @@ class WeddingSpot:
             page = requests.get('https://www.wedding-spot.com/wedding-venues/?sr=1')
             soup = BeautifulSoup(page.text, 'html.parser')
             pages_count = soup.find_all('button', {'class': 'css-158cw5n', 'aria-label': ''})
-            print(pages_count[-1].text)
             return int(pages_count[-1].text)
         except:
             logging.error('[ WEDDING SPOT: something went wrong with getting pages count]')
@@ -79,7 +82,7 @@ class WeddingSpot:
     def start(self):
         pages = self.get_pages_count()
         logging.info('[ WEDDING SPOT ]: got pages count')
-        for page in range(1, pages+1):
+        for page in range(1, pages + 1):
             self.get_all_info(page)
 
     @staticmethod
