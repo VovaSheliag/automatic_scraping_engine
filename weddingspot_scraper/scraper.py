@@ -1,9 +1,13 @@
 import time
 import logging
 
+import coloredlogs
+from selenium import webdriver
 import requests
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 class WeddingSpot:
@@ -54,7 +58,9 @@ class WeddingSpot:
 
     def get_all_info(self, page):
         self.driver.get(f'https://www.wedding-spot.com/wedding-venues/?page={page}&sr=1')
-        time.sleep(2)
+        WebDriverWait(self.driver, 5).until(
+            EC.presence_of_element_located((By.TAG_NAME, "body"))
+        )
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         all_venues = self.driver.find_elements(By.CLASS_NAME, 'venueCard--wrapper')
         for div_path in all_venues:
@@ -66,7 +72,6 @@ class WeddingSpot:
             phone = self.get_phone(link)
             with open('wedding_spot.csv', 'a+') as f:
                 f.write(f'{link},{name},None,{address},{phone},None\n')
-            print(link)
             time.sleep(3)
 
     @staticmethod
@@ -82,7 +87,7 @@ class WeddingSpot:
     def start(self):
         pages = self.get_pages_count()
         logging.info('[ WEDDING SPOT ]: got pages count')
-        for page in range(1, pages + 1):
+        for page in range(1, pages+1):
             self.get_all_info(page)
 
     @staticmethod
@@ -92,4 +97,5 @@ class WeddingSpot:
                 if link in line:
                     return True
             return False
+
 

@@ -15,7 +15,6 @@ class Eventective:
         for link in links:
             page = 1
             while page in self.get_pages_count(link):
-                print(page)
                 r = requests.get(link + f'?p={page}')
                 self.get_info(r)
                 page += 1
@@ -101,15 +100,23 @@ class Eventective:
 
     @staticmethod
     def get_all_wedding_locations():
+        types_links = ['https://www.eventective.com/wedding-venues/',
+                       'https://www.eventective.com/party-event-venues/',
+                       'https://www.eventective.com/meeting-venues/']
         links = []
-        r = requests.get('https://www.eventective.com/wedding-venues/').text
-        soup = BeautifulSoup(r, 'html.parser')
-        divs = soup.find_all('div', {'class': 'col-md-2 col-sm-3 col-xs-6'})
-        for div in divs:
-            all_a = div.find_all('a')
-            for a in all_a:
-                if a.find_all('strong'):
-                    links.append(a['href'])
+        for type_link in types_links:
+            try:
+                r = requests.get(type_link).text
+                soup = BeautifulSoup(r, 'html.parser')
+                divs = soup.find_all('div', {'class': 'col-md-2 col-sm-3 col-xs-6'})
+                for div in divs:
+                    all_a = div.find_all('a')
+                    for a in all_a:
+                        if a.find_all('strong'):
+                            links.append(a['href'])
+                logging.info('[ Eventective ]: got all links')
+            except:
+                logging.error('[ Eventective ]: something went wrong with getting links')
         return links
 
     @staticmethod
