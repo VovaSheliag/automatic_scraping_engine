@@ -26,6 +26,7 @@ class Tripleseat:
                        'Unique&venue_type%5B%5D=Vineyard&venue_type%5B%5D=Wedding&venue_type%5B%5D=Winery']
         for venue_type in venue_types:
             self.driver.get(venue_type)
+            logging.info(f'[ TRIPLE SEAT ]: venue type = {venue_type}')
             WebDriverWait(self.driver, 5).until(
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
@@ -39,7 +40,7 @@ class Tripleseat:
                     website = self.get_venue_website(venue)
                     if self.check_if_exist(link):
                         continue
-                    # self.save_info(link, name, address, phone, website)
+                    self.save_info(link, name, address, phone, website)
                     time.sleep(5)
                 try:
                     self.driver.find_element(By.CLASS_NAME, 'next_page').click()
@@ -47,6 +48,7 @@ class Tripleseat:
                         EC.presence_of_element_located((By.TAG_NAME, "body"))
                     )
                     logging.info('[ TRIPLE SEAT ]: went to new page')
+                    break
                 except:
                     logging.info(f'[ TRIPLE SEAT ]: end with the venue={venue_type}')
 
@@ -55,16 +57,20 @@ class Tripleseat:
     def get_venue_link(venue):
         try:
             link = venue.find_element(By.CLASS_NAME, 'header').find_element(By.TAG_NAME, 'a').get_attribute('href')
+            logging.info(f'[ TRIPLE SEAT ]: got link = {link}')
             return link
         except:
+            logging.error('[ TRIPLE SEAT ]: no link')
             return
 
     @staticmethod
     def get_venue_name(venue):
         try:
             name = venue.find_element(By.CLASS_NAME, 'header').find_element(By.TAG_NAME, 'h3').text.replace(',', '')
+            logging.info('[ TRIPLE SEAT ]: got name')
             return name
         except:
+            logging.error('[ TRIPLE SEAT ]: no name')
             return
 
     @staticmethod
@@ -72,8 +78,10 @@ class Tripleseat:
         try:
             address = venue.find_element(By.CLASS_NAME, 'header').find_element(By.CLASS_NAME, 'map_link').text\
                 .replace(',', '')
+            logging.info('[ TRIPLE SEAT ]: got address')
             return address
         except:
+            logging.error('[ TRIPLE SEAT ]: no address')
             return
 
     @staticmethod
@@ -81,8 +89,10 @@ class Tripleseat:
         try:
             phone = venue.find_element(By.CLASS_NAME, 'header').find_elements(By.TAG_NAME, 'li')[1].find_element(
                 By.TAG_NAME, 'a').get_attribute('href').replace('tel:', '')
+            logging.info('[ TRIPLE SEAT ]: got phone')
             return phone
         except:
+            logging.error('[ TRIPLE SEAT ]: no phone')
             return
 
     @staticmethod
@@ -90,13 +100,16 @@ class Tripleseat:
         try:
             website = venue.find_element(By.CLASS_NAME, 'header').find_element(By.TAG_NAME, 'small').find_element(
                 By.TAG_NAME, 'a').get_attribute('href')
+            logging.info('[ TRIPLE SEAT ]: got website')
             return website
         except:
+            logging.error('[ TRIPLE SEAT ]: no website')
             return
 
     def get_search_result(self):
         try:
             search_result = self.driver.find_element(By.CLASS_NAME, 'search-results')
+            logging.info('[ TRIPLE SEAT ]: got search result')
             return search_result
         except:
 
@@ -127,5 +140,4 @@ class Tripleseat:
                 if (link is None) or (link in line):
                     return True
             return False
-
 
