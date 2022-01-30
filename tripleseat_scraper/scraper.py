@@ -30,7 +30,7 @@ class Tripleseat:
             WebDriverWait(self.driver, 5).until(
                 EC.presence_of_element_located((By.TAG_NAME, "body"))
             )
-            while self.driver.find_element(By.CLASS_NAME, 'next_page'):
+            while True:
                 venues = self.get_page_venues()
                 for venue in venues:
                     link = self.get_venue_link(venue)
@@ -48,9 +48,10 @@ class Tripleseat:
                         EC.presence_of_element_located((By.TAG_NAME, "body"))
                     )
                     logging.info('[ TRIPLE SEAT ]: went to new page')
-                    break
                 except:
                     logging.info(f'[ TRIPLE SEAT ]: end with the venue={venue_type}')
+                    break
+
 
 
     @staticmethod
@@ -117,6 +118,7 @@ class Tripleseat:
 
     def get_page_venues(self):
         try:
+            time.sleep(2)
             venues = [x for x in self.get_search_result().find_elements(By.CLASS_NAME, 'venue_details') if
                       not x.get_attribute('style')]
             logging.info('[ TRIPLE SEAT ]: got venues from page')
@@ -140,4 +142,5 @@ class Tripleseat:
                 if (link is None) or (link in line):
                     return True
             return False
+
 
